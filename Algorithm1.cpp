@@ -19,7 +19,7 @@ bool lookup(int * source, int num);
 Algorithm1::Algorithm1(AdjacencyList* a, int ** groups, int numGroups, int numvertices){
     runAlgo(a, groups, numGroups, numvertices);
 }
-void Algorithm1::runAlgo(AdjacencyList a[], int ** grp, int numGroups, int numvertices){
+void Algorithm1::runAlgo(AdjacencyList mainGraph[], int ** grp, int numGroups, int numvertices){
     int myGroup[numGroups];
     for (int i = 0; i<numGroups; i++) {
         myGroup[i] = 0;
@@ -30,6 +30,8 @@ void Algorithm1::runAlgo(AdjacencyList a[], int ** grp, int numGroups, int numve
     int current = 0;
     tree[0] = 1;
     tree[1] = grp[0][1];
+    cout<<grp[0][1]<<endl;
+    mainGraph[grp[0][1]].treeNode=true;
     
     Path * shortestOverall = new Path();
 
@@ -41,21 +43,15 @@ void Algorithm1::runAlgo(AdjacencyList a[], int ** grp, int numGroups, int numve
                 Path * shortestInGroup = new Path();
                 shortestInGroup->distance = 500000;
                 for (int j = 1; j<=grp[i][0]; j++) {
-                    Path* tmp = Djikstra(grp[i][j], tree, a, numvertices);
+                    Path* tmp = Djikstra(grp[i][j], tree, mainGraph, numvertices);
                     if(tmp->distance==0){
                         int a;
-//                        cout<<"distance became 0 at group: "<<i<<endl;
                     }
                     if (tmp->distance<shortestInGroup->distance) {
                         delete shortestInGroup;
                         shortestInGroup = tmp;
                     }
-//                    if ((tmp->distance==shortestInGroup->distance) && tmp->head->index<shortestInGroup->head->index) {
-//                        delete shortestInGroup;
-//                        shortestInGroup = tmp;
-//                    }
-//                    
-                    
+
                 }
                 int distance = shortestInGroup->distance;
 
@@ -72,19 +68,11 @@ void Algorithm1::runAlgo(AdjacencyList a[], int ** grp, int numGroups, int numve
         }
         PathNode * p = shortestOverall->head;
         while (p!=0) {
-//            for(int i = 1; i<=grp[smallestGroup][0]; i++){
-//                if(lookup(grp[i], p->index))
-//                    for (int j = 0; j<=grp[i][0]; j++) {
-//                        tree[0]++;
-//                        tree[tree[0]] = grp[i][j];
-//                    }
-//
-//
-//            }
-//
+
             if(!lookup(tree, p->index)){
             tree[0]++;
             tree[tree[0]] = p->index;
+                mainGraph[p->index].treeNode=true;
             }
             p = p->next;
         }
@@ -118,6 +106,9 @@ int vertex(AdjacencyList graph[], int numvertices, int distance);
 
 
 Path* Djikstra(int destination, int * source, AdjacencyList graph[], int numvertices){
+    Path * p = new Path();
+    AdjacencyList ret;
+//    cout<<"in di"<<endl;
     clean_distances(graph, numvertices);
      graph[destination].distance = 0;
     while (!graph_finished(graph,numvertices)) {
@@ -125,6 +116,12 @@ Path* Djikstra(int destination, int * source, AdjacencyList graph[], int numvert
         int vIndex = vertex(graph, numvertices, dist);
         AdjacencyList * myVertex = & graph[vIndex] ;
         myVertex->known = true;
+        if(myVertex->treeNode){
+            p->head= new PathNode(vIndex);
+            p->distance = dist;
+            ret = *myVertex;
+            break;
+        }
         Node* edges  = myVertex->head;
         while (edges!=0) {
             AdjacencyList * dVert = &graph[edges->adjacent];
@@ -142,28 +139,23 @@ Path* Djikstra(int destination, int * source, AdjacencyList graph[], int numvert
         
         
     }
-    int dist = 50000;
-    AdjacencyList ret;
-    
-    int ind;
-    for (int j = 1; j<=source[0]; j++) {
-        if (dist>graph[source[j]].distance) {
-            dist=graph[source[j]].distance;
-            if(graph[source[j]].distance==0){
-//                cout<<"there is a 0 weighted path, this CANT be right from "<<source[j]<<" to "<<destination<<endl;
 
-            }
-//            cout<<"the distance of node "<<source[j]<<" is "<<dist<<endl;
-            ret = graph[source[j]];
-            ind = j;
-        }
-    }
+//    int ind;
+//    for (int j = 1; j<=source[0]; j++) {
+//        if (dist>graph[source[j]].distance) {
+//            dist=graph[source[j]].distance;
+//            if(graph[source[j]].distance==0){
+////                cout<<"there is a 0 weighted path, this CANT be right from "<<source[j]<<" to "<<destination<<endl;
+//
+//            }
+////            cout<<"the distance of node "<<source[j]<<" is "<<dist<<endl;
+//            ret = graph[source[j]];
+//            ind = j;
+//        }
+//    }
 
 //    cout<<"ending now"<<endl;
 //    exit(0);
-    Path * p = new Path();
-    p->distance = dist;
-    p->head = new PathNode(source[ind]);
     PathNode * pnode=p->head;
     if(!pnode){
         cout<<"pnode is null ya dingus"<<endl;

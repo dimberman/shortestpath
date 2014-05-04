@@ -22,6 +22,7 @@ public:
     int path;
     bool known;
     Node * head;
+    bool treeNode;
     
     
 };

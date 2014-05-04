@@ -11,6 +11,7 @@
 
 AdjacencyList::AdjacencyList(){
     head = new Node(-1,0,0);
+    treeNode=false;
 }
 
 void AdjacencyList::insert(int w, int a){
